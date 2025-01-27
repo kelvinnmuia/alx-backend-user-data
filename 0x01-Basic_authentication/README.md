@@ -54,7 +54,7 @@ bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/status" -vvv
 bob@dylan:~$
 ```
 
-  * [0x01-Basic_authentication](./0x01-Basic_authentication)
+  * [0x01-Basic_authentication](./)
 
 **1. Error handler: Unauthorized**
 
