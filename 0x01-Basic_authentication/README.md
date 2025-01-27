@@ -318,4 +318,90 @@ bob@dylan:~$
   * [api/v1/app.py](./api/v1/app.py)
   * [api/v1/auth/auth.py](./api/v1/auth/auth.py)
 
+**6. Basic auth**
 
+Create a class `BasicAuth` that inherits from `Auth`. For the moment this class will be empty.
+
+Update `api/v1/app.py` for using `BasicAuth` class instead of `Auth` depending of the value of the environment variable `AUTH_TYPE`, If `AUTH_TYPE` is equal to `basic_auth`:
+
+  * import `BasicAuth` from `api.v1.auth.basic_auth`
+  * create an instance of `BasicAuth` and assign it to the variable `auth`
+
+Otherwise, keep the previous mechanism with `auth` an instance of `Auth`.
+
+In the first terminal:
+
+```
+bob@dylan:~$ API_HOST=0.0.0.0 API_PORT=5000 AUTH_TYPE=basic_auth python3 -m api.v1.app
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+....
+```
+
+In a second terminal:
+
+```
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/status"
+{
+  "status": "OK"
+}
+bob@dylan:~$
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/status/"
+{
+  "status": "OK"
+}
+bob@dylan:~$
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/users"
+{
+  "error": "Unauthorized"
+}
+bob@dylan:~$
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/users" -H "Authorization: Test"
+{
+  "error": "Forbidden"
+}
+bob@dylan:~$
+```
+
+  * [api/v1/app.py](./api/v1/app.py)
+  * [api/v1/auth/basic_auth.py](./api/v1/auth/basic_auth.py)
+
+**7. Basic - Base64 part**
+
+Add the method `def extract_base64_authorization_header(self, authorization_header: str) -> str:` in the class `BasicAuth` that returns the Base64 part of the `Authorization` header for a Basic Authentication:
+
+  * Return `None` if `authorization_header` is `None`
+  * Return `None` if `authorization_header` is not a string
+  * Return `None` if `authorization_header` doesn’t start by `Basic` (with a space at the end)
+  * Otherwise, return the value after `Basic` (after the space)
+  * You can assume `authorization_header` contains only one `Basic`
+
+```
+bob@dylan:~$ cat main_2.py
+#!/usr/bin/env python3
+""" Main 2
+"""
+from api.v1.auth.basic_auth import BasicAuth
+
+a = BasicAuth()
+
+print(a.extract_base64_authorization_header(None))
+print(a.extract_base64_authorization_header(89))
+print(a.extract_base64_authorization_header("ALX"))
+print(a.extract_base64_authorization_header("Basic ALX"))
+print(a.extract_base64_authorization_header("Basic SG9sYmVydG9u"))
+print(a.extract_base64_authorization_header("Basic SG9sYmVydG9uIFNjaG9vbA=="))
+print(a.extract_base64_authorization_header("Basic1234"))
+
+bob@dylan:~$
+bob@dylan:~$ API_HOST=0.0.0.0 API_PORT=5000 ./main_2.py
+None
+None
+None
+ALX
+SG9sYmVydG9u
+SG9sYmVydG9uIFNjaG9vbA==
+None
+bob@dylan:~$
+```
+
+  * [api/v1/auth/basic_auth.py](./api/v1/auth/basic_auth.py)
