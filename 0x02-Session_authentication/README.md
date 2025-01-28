@@ -1,44 +1,111 @@
-# 0x02. Session-authentication-project.
+# 0x02. Session authentication
+## The Domains/Concepts covered in this project: `Back-end` `Authentification`
 
-# Simple API
+This project introduced me to session authentication, a technique for managing user authentication through server-side stored sessions. I learned how to implement session-based login systems, manage session cookies securely, and maintain user state across multiple requests in backend applications.
 
-Simple HTTP API for playing with `User` model.
+## Background Context
 
+In this project, you will implement a **Session Authentication**. You are not allowed to install any other module.
 
-## Files
-
-### `models/`
-
-- `base.py`: base of all models of the API - handle serialization to file
-- `user.py`: user model
-
-### `api/v1`
-
-- `app.py`: entry point of the API
-- `views/index.py`: basic endpoints of the API: `/status` and `/stats`
-- `views/users.py`: all users endpoints
+In the industry, you should **not** implement your own Session authentication system and use a module or framework that doing it for you (like in Python-Flask: [Flask-HTTPAuth](https://flask-httpauth.readthedocs.io/en/latest/). Here, for the learning purpose, we will walk through each step of this mechanism to understand it by doing.
 
 
-## Setup
+## Tasks :page_with_curl:
+
+**0. Et moi et moi et moi!**
+
+Copy all your work of the **0x06. Basic authentication** project in this new folder.
+
+In this version, you implemented a **Basic authentication** for giving you access to all User endpoints:
+
+  * `GET /api/v1/users`
+  * `POST /api/v1/users`
+  * `GET /api/v1/users/<user_id>`
+  * `PUT /api/v1/users/<user_id>`
+  * `DELETE /api/v1/users/<user_id>`
+
+Now, you will add a new endpoint: `GET /users/me` to retrieve the authenticated `User` object.
+
+  * Copy folders `models` and `api` from the previous project `0x06. Basic authentication`
+  * Please make sure all mandatory tasks of this previous project are done at 100% because this project (and the rest of this track) will be based on it.
+  * Update `@app.before_request` in `api/v1/app.py`:
+    * Assign the result of `auth.current_user(request)` to `request.current_user`
+
+  * Update method for the route `GET /api/v1/users/<user_id>` in `api/v1/views/users.py`:
+  * If `<user_id>` is equal to `me` and `request.current_user` is `None`: `abort(404)`
+  * If `<user_id>` is equal to `me` and `request.current_user` is not `None`: return the authenticated User in a JSON response (like a normal case of `GET /api/v1/users/<user_id>` where `<user_id>` is a valid `User` ID)
+  * Otherwise, keep the same behavior
+
+In the first terminal:
 
 ```
-$ pip3 install -r requirements.txt
+bob@dylan:~$ cat main_0.py
+#!/usr/bin/env python3
+""" Main 0
+"""
+import base64
+from api.v1.auth.basic_auth import BasicAuth
+from models.user import User
+
+""" Create a user test """
+user_email = "bob@hbtn.io"
+user_clear_pwd = "H0lbertonSchool98!"
+
+user = User()
+user.email = user_email
+user.password = user_clear_pwd
+print("New user: {}".format(user.id))
+user.save()
+
+basic_clear = "{}:{}".format(user_email, user_clear_pwd)
+print("Basic Base64: {}".format(base64.b64encode(basic_clear.encode('utf-8')).decode("utf-8")))
+
+bob@dylan:~$
+bob@dylan:~$ API_HOST=0.0.0.0 API_PORT=5000 AUTH_TYPE=basic_auth ./main_0.py 
+New user: 9375973a-68c7-46aa-b135-29f79e837495
+Basic Base64: Ym9iQGhidG4uaW86SDBsYmVydG9uU2Nob29sOTgh
+bob@dylan:~$
+bob@dylan:~$ API_HOST=0.0.0.0 API_PORT=5000 AUTH_TYPE=basic_auth python3 -m api.v1.app
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+....
 ```
 
-
-## Run
+In a second terminal:
 
 ```
-$ API_HOST=0.0.0.0 API_PORT=5000 python3 -m api.v1.app
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/status"
+{
+  "status": "OK"
+}
+bob@dylan:~$
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/users"
+{
+  "error": "Unauthorized"
+}
+bob@dylan:~$ 
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/users" -H "Authorization: Basic Ym9iQGhidG4uaW86SDBsYmVydG9uU2Nob29sOTgh"
+[
+  {
+    "created_at": "2017-09-25 01:55:17", 
+    "email": "bob@hbtn.io", 
+    "first_name": null, 
+    "id": "9375973a-68c7-46aa-b135-29f79e837495", 
+    "last_name": null, 
+    "updated_at": "2017-09-25 01:55:17"
+  }
+]
+bob@dylan:~$
+bob@dylan:~$ curl "http://0.0.0.0:5000/api/v1/users/me" -H "Authorization: Basic Ym9iQGhidG4uaW86SDBsYmVydG9uU2Nob29sOTgh"
+{
+  "created_at": "2017-09-25 01:55:17", 
+  "email": "bob@hbtn.io", 
+  "first_name": null, 
+  "id": "9375973a-68c7-46aa-b135-29f79e837495", 
+  "last_name": null, 
+  "updated_at": "2017-09-25 01:55:17"
+}
+bob@dylan:~$
 ```
 
-
-## Routes
-
-- `GET /api/v1/status`: returns the status of the API
-- `GET /api/v1/stats`: returns some stats of the API
-- `GET /api/v1/users`: returns the list of users
-- `GET /api/v1/users/:id`: returns an user based on the ID
-- `DELETE /api/v1/users/:id`: deletes an user based on the ID
-- `POST /api/v1/users`: creates a new user (JSON parameters: `email`, `password`, `last_name` (optional) and `first_name` (optional))
-- `PUT /api/v1/users/:id`: updates an user based on the ID (JSON parameters: `last_name` and `first_name`)
+  * [api/v1/app.py](./api/v1/app.py)
+  * [api/v1/views/users.py](./api/v1/views/users.py)
