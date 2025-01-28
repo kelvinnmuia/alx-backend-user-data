@@ -303,3 +303,7 @@ bob@dylan:~$
 ```
 
   * [api/v1/auth/session_auth.py](./api/v1/auth/session_auth.py)
+
+**4. Session cookie**
+
+
