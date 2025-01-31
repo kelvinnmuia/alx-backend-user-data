@@ -1,4 +1,4 @@
-# 0x03. User authentication service
+# 0x03. User authentication servicessssssss
 ## The Domains/Concepts covered in this project: `Back-end` `Authentification`
 
 This project introduced me to building a user authentication service, a crucial component for securing backend applications and managing user access. I learned how to implement authentication mechanisms such as session and token-based authentication, handle user registration and login, and enforce security best practices.
