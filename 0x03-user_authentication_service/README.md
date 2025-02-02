@@ -312,7 +312,7 @@ if __name__ == "__main__":
 
   * [app.py](./app.py)
 
-7. Register user
+**7. Register user**
 
 In this task, you will implement the end-point to register a `user`. Define a users function that implements the `POST /users` route.
 
