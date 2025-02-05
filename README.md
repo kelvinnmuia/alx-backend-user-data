@@ -18,7 +18,7 @@ The repository covers key user data management concepts, including:
 
 The projects in this repository progressively build expertise in user data management and authentication systems:
 
-**Back-end - User Data**
+## Back-end - User Data
 
   * [0x00. Personal data](./0x00-personal_data)
   * [0x01. Basic authentication](./0x01-Basic_authentication)
